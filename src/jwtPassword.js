@@ -1,1 +1,1 @@
-module.exports = "abc123";
+module.exports = "senhaTeste";

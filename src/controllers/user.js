@@ -73,7 +73,7 @@ const login = async (req, res) => {
 
     return res.status(200).json({ usuario: userLogged, token });
   } catch (error) {
-    return res.status(500).json({ message: "Erro interno do servidor" });
+    return res.status(500).json({ message: error.message });
   }
 };
 
