@@ -7,6 +7,7 @@ const {
 } = require("./controllers/user");
 const { getCategories } = require("./controllers/category");
 const auth = require("./middleware/auth");
+const { getUserTransactions } = require("./controllers/transactions");
 const routes = express();
 
 routes.post("/usuario", registerUser);
@@ -15,5 +16,7 @@ routes.get("/usuario", auth, detailUser);
 routes.put("/usuario", auth, updateUser);
 
 routes.get("/categoria", auth, getCategories);
+
+routes.get("/transacao", auth, getUserTransactions);
 
 module.exports = routes;
