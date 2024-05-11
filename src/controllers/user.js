@@ -38,6 +38,46 @@ const registerUser = async (req, res) => {
   }
 };
 
+const login = async (req, res) => {
+  const { email, senha } = req.body;
+
+  try {
+    if (!email || !senha) {
+      return res
+        .status(400)
+        .json({ message: "Campos obrigatorios não fornecidos." });
+    }
+    const user = await pool.query("select * from usuarios where email = $1", [
+      email,
+    ]);
+
+    if (user.rowCount < 1) {
+      return res
+        .status(404)
+        .json({ message: "Usuário e/ou senha inválido(s)." });
+    }
+
+    const validPassword = await bcrypt.compare(senha, user.rows[0].senha);
+
+    if (!validPassword) {
+      return res
+        .status(400)
+        .json({ message: "Usuário e/ou senha inválido(s)." });
+    }
+
+    const token = jwt.sign({ id: user.rows[0].id }, password, {
+      expiresIn: "8h",
+    });
+
+    const { senha: _, ...userLogged } = user.rows[0];
+
+    return res.status(200).json({ usuario: userLogged, token });
+  } catch (error) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
+};
+
 module.exports = {
   registerUser,
+  login,
 };
