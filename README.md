@@ -104,7 +104,7 @@ Agora que o servidor está em execução, você pode acessar os endpoints da API
 
 
 ## Tecnologias Utilizadas
-[![My Skills](https://skillicons.dev/icons?i=js,nodejs,insomnia,express,postgres,git,github )](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=js,nodejs,express,postgres,git,github )](https://skillicons.dev)
 
 
 ## Licença
