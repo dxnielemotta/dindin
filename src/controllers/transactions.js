@@ -6,6 +6,12 @@ const getCategory = async (categoria_id) => {
   return categoryResult.rows[0];
 };
 
+const getTransaction = async (id, usuario_id) => {
+  const query = "select from transacoes where id = $1 and usuario_id = $2";
+  const transaction = await pool.query(query, [id, usuario_id]);
+  return transaction.rows[0];
+};
+
 const getUserTransactions = async (req, res) => {
   const usuario_id = req.user.id;
   try {
@@ -77,8 +83,49 @@ const registerTransaction = async (req, res) => {
   }
 };
 
+const updateTransaction = async (req, res) => {
+  const { id } = req.params;
+  const { descricao, valor, data, categoria_id, tipo } = req.body;
+  const usuario_id = req.user.id;
+
+  try {
+    if (!descricao || !valor || !data || !categoria_id || !tipo) {
+      return res.status(400).json({
+        mensagem: "Todos os campos obrigatórios devem ser informados",
+      });
+    }
+
+    const transaction = getTransaction(id, usuario_id);
+
+    if (!transaction) {
+      return res.status(404).json({ mensagem: "Transação não encontrada" });
+    }
+
+    const category = await getCategory(categoria_id);
+
+    if (!category) {
+      return res.status(404).json({ mensagem: "Categoria não encontrada" });
+    }
+
+    if (tipo !== "entrada" && tipo !== "saida") {
+      return res
+        .status(400)
+        .json({ mensagem: "O tipo da transação é inválido" });
+    }
+
+    await pool.query(
+      "update transacoes set descricao = $1, valor = $2, data = $3, categoria_id = $4, tipo = $5 where id = $6",
+      [descricao, valor, data, categoria_id, tipo, id]
+    );
+    return res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ message: "Erro interno do servidor" });
+  }
+};
+
 module.exports = {
   getUserTransactions,
   detailTransaction,
   registerTransaction,
+  updateTransaction,
 };
