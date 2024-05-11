@@ -145,10 +145,33 @@ const deleteTransaction = async (req, res) => {
   }
 };
 
+const getAccountStatement = async (req, res) => {
+  const { user } = req;
+  try {
+    const incoming = await pool.query(
+      "select coalesce(sum(valor), 0) as total_entrada from transacoes where usuario_id = $1 and tipo = 'entrada'",
+      [user.id]
+    );
+    const totalIncoming = incoming.rows[0].total_entrada;
+
+    const outcoming = await pool.query(
+      "select coalesce(sum(valor), 0) as total_saida from transacoes where usuario_id = $1 and tipo = 'saida'",
+      [user.id]
+    );
+
+    const totalOutcoming = outcoming.rows[0].total_saida;
+
+    res.status(200).json({ entrada: totalIncoming, saida: totalOutcoming });
+  } catch (error) {
+    res.status(500).json({ message: "Erro interno do servidor" });
+  }
+};
+
 module.exports = {
   getUserTransactions,
   detailTransaction,
   registerTransaction,
   updateTransaction,
   deleteTransaction,
+  getAccountStatement,
 };
