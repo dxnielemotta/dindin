@@ -92,8 +92,46 @@ const detailUser = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  const { nome, email, senha } = req.body;
+  if (!req.user) {
+    return res.status(401).json({ message: "Não autorizado" });
+  }
+
+  try {
+    if (!nome || !email || !senha) {
+      return res.status(400).json({
+        message: "Todos os campos (nome, email, senha) são obrigatórios.",
+      });
+    }
+
+    const emailExists = await pool.query(
+      "select * from usuarios where email = $1 and id != $2",
+      [email, req.user.id]
+    );
+    if (emailExists.rowCount > 0) {
+      return res.status(400).json({
+        message:
+          "O e-mail informado já está sendo utilizado por outro usuário.",
+      });
+    }
+
+    const encryptedPassword = await bcrypt.hash(senha, 10);
+
+    await pool.query(
+      "update usuarios set nome = $1, email = $2, senha = $3 where id = $4",
+      [nome, email, encryptedPassword, req.user.id]
+    );
+
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
+};
+
 module.exports = {
   registerUser,
   login,
   detailUser,
+  updateUser,
 };
