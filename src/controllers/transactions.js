@@ -123,9 +123,32 @@ const updateTransaction = async (req, res) => {
   }
 };
 
+const deleteTransaction = async (req, res) => {
+  const { id } = req.params;
+  const usuario_id = req.user.id;
+
+  try {
+    const transaction = await getTransaction(id, usuario_id);
+
+    if (!transaction) {
+      return res.status(404).json({ mensagem: "Transação não encontrada" });
+    }
+
+    await pool.query(
+      "delete from transacoes where id = $1 and usuario_id = $2",
+      [id, usuario_id]
+    );
+
+    return res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ message: "Erro interno do servidor" });
+  }
+};
+
 module.exports = {
   getUserTransactions,
   detailTransaction,
   registerTransaction,
   updateTransaction,
+  deleteTransaction,
 };
