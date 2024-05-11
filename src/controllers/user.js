@@ -77,7 +77,23 @@ const login = async (req, res) => {
   }
 };
 
+const detailUser = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Não autorizado" });
+    }
+    const { rows } = await pool.query("select * from usuarios where id = $1", [
+      req.user.id,
+    ]);
+    return res.status(200).json(rows);
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
+};
+
 module.exports = {
   registerUser,
   login,
+  detailUser,
 };
